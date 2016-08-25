@@ -1,25 +1,85 @@
-#!/usr/bin/env python
-#
-# Copyright 2007 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-import webapp2
 
-class MainHandler(webapp2.RequestHandler):
+import webapp2
+from caesar import encrypt
+import cgi
+
+
+page_header = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ROT13</title>
+    <style type="text/css">
+        textarea
+        {
+        width: 600px;
+        height: 200px;
+        }
+        h1
+        {
+        color: purple;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        <a href="/">ROT13</a>
+    </h1>
+"""
+
+# html boilerplate
+page_footer = """
+</body>
+</html>
+"""
+
+
+
+class Index(webapp2.RequestHandler):
+
+#builds the page the first time and retreives the user's information
     def get(self):
-        self.response.write('Hello world!')
+
+        user_input = """
+<form method = "post">
+<label><p><em>How many places would you like to shift?</em></p></label>
+<input type="text" name="places" value="0">
+<label><p><em>Enter the text you wish to encrypt</em></p></label>
+<textarea name="original">{}</textarea>
+<input type="submit">
+</form
+""".format("")
+
+        response = page_header + user_input + page_footer
+        self.response.write(response)
+
+#takes the posted information, runs the encrypt function
+#then builds the page again with the encrypted string
+
+    def post(self):
+        user_string = self.request.get("original")
+        shift_num = self.request.get("places")
+
+        answer = encrypt(cgi.escape(user_string, quote=True), int(shift_num))
+
+        user_input = """
+<form method = "post">
+<label><p><em>How many places would you like to shift?</em></p></label>
+<input type="text" name="places" value="0">
+<label><p><em>Enter the text you wish to encrypt</em></p></label>
+<textarea name="original">{}</textarea>
+<input type="submit">
+</form
+""".format(answer)
+
+        response = page_header + user_input + page_footer
+        self.response.write(response)
+
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', Index),
+
 ], debug=True)
